@@ -14,12 +14,14 @@ import {
   ChevronDownIcon,
   DocumentIcon,
   SpinnerIcon,
+  ChatIcon,
 } from "./Icons";
 import { useDeleteStore, useDocuments, useImportFile, useDeleteDocument } from "@/lib/hooks";
 import { toast } from "sonner";
 
 interface StoreCardProps {
   store: FileSearchStore;
+  onOpenChat?: (storeId: string) => void;
 }
 
 function getStoreId(name: string): string {
@@ -39,7 +41,7 @@ function formatDate(dateStr: string | undefined): string {
   });
 }
 
-export function StoreCard({ store }: StoreCardProps) {
+export function StoreCard({ store, onOpenChat }: StoreCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const storeId = getStoreId(store.name);
 
@@ -156,6 +158,16 @@ export function StoreCard({ store }: StoreCardProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenChat?.(storeId);
+            }}
+            className="p-2 rounded-lg hover:bg-indigo-500/20 text-gray-400 hover:text-indigo-400 transition-all opacity-60 hover:opacity-100"
+            title="Chat with documents"
+          >
+            <ChatIcon className="w-4 h-4" />
+          </button>
           <button
             onClick={handleDeleteStore}
             disabled={deleteStore.isPending}

@@ -9,10 +9,18 @@ import {
   CreateStoreButton,
   CreateStoreModal,
 } from "./components/CreateStoreModal";
-import { FolderIcon, FileIcon } from "./components/Icons";
+import { ChatPanel } from "./components/ChatPanel";
+import { FolderIcon, FileIcon, ChatIcon } from "./components/Icons";
 
 export default function Dashboard() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatStoreId, setChatStoreId] = useState<string | undefined>(undefined);
+
+  const handleOpenChat = (storeId?: string) => {
+    setChatStoreId(storeId);
+    setIsChatOpen(true);
+  };
 
   const {
     data: stores,
@@ -58,6 +66,14 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+          {/* Chat button in header */}
+          <button
+            onClick={() => handleOpenChat()}
+            className="flex items-center gap-2 px-4 py-2 bg-[#6366f1] hover:bg-[#818cf8] rounded-xl text-white text-sm font-medium transition-colors"
+          >
+            <ChatIcon className="w-4 h-4" />
+            <span>Chat</span>
+          </button>
         </div>
       </header>
 
@@ -102,7 +118,11 @@ export default function Dashboard() {
             ) : stores && stores.length > 0 ? (
               <div className="space-y-4">
                 {stores.map((store) => (
-                  <StoreCard key={store.name} store={store} />
+                  <StoreCard
+                    key={store.name}
+                    store={store}
+                    onOpenChat={handleOpenChat}
+                  />
                 ))}
               </div>
             ) : (
@@ -203,6 +223,13 @@ export default function Dashboard() {
       <CreateStoreModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
+      />
+
+      {/* Chat Panel */}
+      <ChatPanel
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        initialStoreId={chatStoreId}
       />
     </div>
   );
