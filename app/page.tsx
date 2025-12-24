@@ -65,15 +65,18 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
+            {/* Chat button in header - centered */}
+            <div className="flex-1 flex justify-center">
+              <button
+                onClick={() => handleOpenChat()}
+                className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:from-[#818cf8] hover:to-[#a78bfa] rounded-xl text-white text-base font-semibold transition-all duration-200 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/50 hover:scale-105 active:scale-95"
+              >
+                <ChatIcon className="w-5 h-5" />
+                <span>Chat</span>
+              </button>
+            </div>
+            <div className="w-[200px]"></div>
           </div>
-          {/* Chat button in header */}
-          <button
-            onClick={() => handleOpenChat()}
-            className="flex items-center gap-2 px-4 py-2 bg-[#6366f1] hover:bg-[#818cf8] rounded-xl text-white text-sm font-medium transition-colors"
-          >
-            <ChatIcon className="w-4 h-4" />
-            <span>Chat</span>
-          </button>
         </div>
       </header>
 
