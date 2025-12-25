@@ -6,7 +6,7 @@ function getGeminiClient() {
   if (!apiKey) {
     throw new Error(
       "GEMINI_API_KEY environment variable is not set. " +
-        "Get your API key from https://aistudio.google.com/apikey and add it to .env.local"
+        "Get your API key from https://aistudio.google.com/apikey and rename .env.local.example to .env.local"
     );
   }
 
