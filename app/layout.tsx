@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased font-sans bg-[#0a0a14] text-gray-100 min-h-screen`}
+        className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased font-sans bg-[var(--bg-base)] text-[var(--text-primary)] min-h-screen`}
       >
         <Providers>{children}</Providers>
       </body>
