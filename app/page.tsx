@@ -10,7 +10,7 @@ import {
   CreateStoreModal,
 } from "./components/CreateStoreModal";
 import { ChatPanel } from "./components/ChatPanel";
-import { FolderIcon, FileIcon, ChatIcon } from "./components/Icons";
+import { FolderIcon, FileIcon, ChatIconFancy } from "./components/Icons";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
 
@@ -69,14 +69,55 @@ export default function Dashboard() {
             </div>
             {/* Chat button in header - centered */}
             <div className="flex-1 flex justify-center">
-              <Button
+              <button
                 onClick={() => handleOpenChat()}
-                variant="neumorphic-glow"
-                className="gap-3 px-7 py-3.5 h-auto text-base font-semibold"
+                className="group relative overflow-hidden px-8 py-4 rounded-2xl cursor-pointer
+                  bg-gradient-to-br from-[#1e1e28] via-[#252532] to-[#1a1a22]
+                  shadow-[6px_6px_16px_var(--shadow-dark),-6px_-6px_16px_var(--shadow-light),inset_0_1px_0_rgba(255,255,255,0.08)]
+                  border border-amber-500/20
+                  transition-all duration-300 ease-out
+                  hover:shadow-[8px_8px_20px_var(--shadow-dark),-8px_-8px_20px_var(--shadow-light),0_0_40px_rgba(245,158,11,0.25),inset_0_1px_0_rgba(255,255,255,0.1)]
+                  hover:-translate-y-1 hover:scale-[1.03] hover:border-amber-400/40
+                  active:shadow-[inset_4px_4px_10px_var(--shadow-dark),inset_-4px_-4px_10px_var(--shadow-light)]
+                  active:translate-y-0 active:scale-100
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)]"
               >
-                <ChatIcon className="w-5 h-5" />
-                <span>Chat</span>
-              </Button>
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/10 to-amber-500/0 
+                  translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
+                
+                {/* Glow orb */}
+                <div className="absolute -top-8 -right-8 w-20 h-20 bg-amber-500/20 rounded-full blur-2xl 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute -bottom-8 -left-8 w-16 h-16 bg-orange-500/15 rounded-full blur-xl 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100" />
+                
+                {/* Content */}
+                <div className="relative flex items-center gap-3">
+                  <div className="relative">
+                    <ChatIconFancy className="w-6 h-6 transition-transform duration-300 group-hover:scale-110" />
+                    {/* Icon glow */}
+                    <div className="absolute inset-0 w-6 h-6 bg-amber-500/30 blur-md rounded-full 
+                      opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <span className="font-semibold text-base tracking-wide
+                    bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 bg-clip-text text-transparent
+                    group-hover:from-amber-200 group-hover:via-amber-300 group-hover:to-orange-300
+                    transition-all duration-300">
+                    Start Chat
+                  </span>
+                  {/* Arrow indicator */}
+                  <svg 
+                    className="w-4 h-4 text-amber-500/60 transition-all duration-300 
+                      translate-x-0 group-hover:translate-x-1 group-hover:text-amber-400"
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+              </button>
             </div>
             <div className="w-[200px]"></div>
           </div>

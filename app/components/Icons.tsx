@@ -196,6 +196,59 @@ export function ChatIcon({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
+export function ChatIconFancy({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient id="chatGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#fbbf24" />
+          <stop offset="50%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#f97316" />
+        </linearGradient>
+        <linearGradient id="sparkleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#fbbf24" stopOpacity="0.6" />
+        </linearGradient>
+      </defs>
+      {/* Main chat bubble */}
+      <path
+        d="M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+        fill="url(#chatGradient)"
+        opacity="0.15"
+      />
+      <path
+        d="M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+        stroke="url(#chatGradient)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Animated dots */}
+      <circle cx="8" cy="12" r="1.25" fill="url(#chatGradient)" className="animate-pulse" style={{ animationDelay: '0ms' }} />
+      <circle cx="12" cy="12" r="1.25" fill="url(#chatGradient)" className="animate-pulse" style={{ animationDelay: '150ms' }} />
+      <circle cx="16" cy="12" r="1.25" fill="url(#chatGradient)" className="animate-pulse" style={{ animationDelay: '300ms' }} />
+      {/* Sparkle decorations */}
+      <path
+        d="M19 4l0.5 1.5L21 6l-1.5 0.5L19 8l-0.5-1.5L17 6l1.5-0.5L19 4z"
+        fill="url(#sparkleGradient)"
+        className="animate-pulse"
+        style={{ animationDuration: '2s' }}
+      />
+      <path
+        d="M5 2l0.35 1L6.35 3.35l-1 0.35L5 5l-0.35-1.3L3.65 3.35l1-0.35L5 2z"
+        fill="url(#sparkleGradient)"
+        className="animate-pulse"
+        style={{ animationDuration: '2.5s', animationDelay: '500ms' }}
+      />
+    </svg>
+  );
+}
+
 export function SendIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg
