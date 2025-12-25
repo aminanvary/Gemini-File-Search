@@ -127,7 +127,7 @@ export function UploadZone() {
                 </span>
               </p>
               <p className="text-sm text-[var(--text-muted)]">
-                Supports text, PDF, images, audio, and video files
+                Max 100 MB per file • Documents, code, and text files
               </p>
             </div>
           </>
