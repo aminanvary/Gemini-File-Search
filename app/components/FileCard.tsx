@@ -143,13 +143,13 @@ export function FileCard({ file }: FileCardProps) {
             )}>
               {mimeShort}
             </span>
-            <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
+            <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1">
               <svg className="w-3 h-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
               </svg>
               {formatBytes(file.sizeBytes)}
             </span>
-            <span className="text-xs text-[var(--text-muted)]/70 flex items-center gap-1">
+            <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1">
               <svg className="w-3 h-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
