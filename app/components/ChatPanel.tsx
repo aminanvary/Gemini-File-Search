@@ -109,7 +109,7 @@ export function ChatPanel({ isOpen, onClose, initialStoreId }: ChatPanelProps) {
               <DialogTitle className="text-lg font-semibold text-[var(--text-primary)]">
                 Chat with Documents
               </DialogTitle>
-              <DialogDescription className="text-xs text-[var(--text-muted)]">
+              <DialogDescription className="text-xs text-[var(--text-secondary)]">
                 Ask questions about your library
               </DialogDescription>
             </div>
