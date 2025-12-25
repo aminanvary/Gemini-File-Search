@@ -62,7 +62,7 @@ export default function Dashboard() {
                 <h1 className="text-xl font-semibold text-[var(--text-primary)]">
                   Gemini File Search
                 </h1>
-                <p className="text-sm text-[var(--text-muted)]">
+                <p className="text-sm text-[var(--text-secondary)]">
                   Visualize and manage your libraries & files
                 </p>
               </div>

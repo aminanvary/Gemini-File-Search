@@ -183,8 +183,8 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
               <DocumentIcon className="w-3 h-3 text-[var(--accent-primary)]/70" />
               <span className="font-medium">{documents?.length ?? "..."}</span>
             </span>
-            <span className="text-[var(--text-muted)]">•</span>
-            <span className="text-[var(--text-muted)]">{formatDate(store.createTime)}</span>
+            <span className="text-[var(--text-secondary)]">•</span>
+            <span className="text-[var(--text-secondary)]">{formatDate(store.createTime)}</span>
           </div>
         </div>
 
