@@ -16,8 +16,15 @@ import {
   SpinnerIcon,
   ChatIcon,
 } from "./Icons";
-import { useDeleteStore, useDocuments, useImportFile, useDeleteDocument } from "@/lib/hooks";
+import {
+  useDeleteStore,
+  useDocuments,
+  useImportFile,
+  useDeleteDocument,
+} from "@/lib/hooks";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { Button } from "@/app/components/ui/button";
 
 interface StoreCardProps {
   store: FileSearchStore;
@@ -118,26 +125,32 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
 
   return (
     <div
-      ref={drop}
-      className={`
-        bg-[#1a1a2e] border rounded-xl overflow-hidden
-        transition-all duration-200 animate-fade-in
-        ${isOver ? "drop-hover border-[#818cf8]" : canDrop ? "drop-active border-[#6366f1]" : "border-[#2a2a4e]"}
-        ${importFile.isPending ? "animate-pulse-glow" : ""}
-      `}
+      ref={drop as unknown as React.Ref<HTMLDivElement>}
+      className={cn(
+        "rounded-2xl overflow-hidden transition-all duration-300 animate-fade-in",
+        "bg-[var(--bg-elevated)] shadow-[var(--neu-raised)] border",
+        isOver
+          ? "border-[var(--accent-hover)] shadow-[var(--neu-float),0_0_30px_rgba(245,158,11,0.2)] bg-[var(--accent-primary)]/5"
+          : canDrop
+            ? "border-[var(--accent-primary)] shadow-[var(--neu-raised),0_0_20px_rgba(245,158,11,0.1)]"
+            : "border-transparent hover:border-[var(--accent-primary)]/20",
+        importFile.isPending && "animate-pulse-glow"
+      )}
     >
       {/* Header */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="group flex items-center gap-3 p-4 cursor-pointer hover:bg-[#1f1f35] transition-colors"
+        className="group flex items-center gap-3 p-4 cursor-pointer hover:bg-[var(--bg-surface)]/50 transition-colors"
       >
         {/* Folder icon */}
         <div
-          className={`
-            w-10 h-10 rounded-lg flex items-center justify-center
-            ${isDropTarget ? "bg-indigo-500/30 text-indigo-300" : "bg-indigo-500/20 text-indigo-400"}
-            transition-colors
-          `}
+          className={cn(
+            "w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300",
+            "shadow-[var(--neu-subtle)]",
+            isDropTarget
+              ? "bg-[var(--accent-primary)]/30 text-[var(--accent-hover)] scale-110"
+              : "bg-[var(--accent-primary)]/20 text-[var(--accent-primary)]"
+          )}
         >
           {importFile.isPending ? (
             <SpinnerIcon className="w-5 h-5" />
@@ -148,30 +161,34 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
 
         {/* Store info */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-gray-100 truncate">
+          <h3 className="text-sm font-medium text-[var(--text-primary)] truncate">
             {store.displayName || storeId}
           </h3>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-[var(--text-muted)]">
             {documents?.length ?? "..."} documents • {formatDate(store.createTime)}
           </p>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
-          <button
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={(e) => {
               e.stopPropagation();
               onOpenChat?.(storeId);
             }}
-            className="p-2 rounded-lg hover:bg-indigo-500/20 text-gray-400 hover:text-indigo-400 transition-all opacity-60 hover:opacity-100"
+            className="opacity-60 hover:opacity-100 text-[var(--text-secondary)] hover:text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/10"
             title="Chat with documents"
           >
             <ChatIcon className="w-4 h-4" />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleDeleteStore}
             disabled={deleteStore.isPending}
-            className="p-2 rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all opacity-60 hover:opacity-100"
+            className="opacity-60 hover:opacity-100 text-[var(--text-secondary)] hover:text-[var(--danger)] hover:bg-[var(--danger)]/10"
             title="Delete library"
           >
             {deleteStore.isPending ? (
@@ -179,18 +196,21 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
             ) : (
               <TrashIcon className="w-4 h-4" />
             )}
-          </button>
+          </Button>
           <ChevronDownIcon
-            className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+            className={cn(
+              "w-5 h-5 text-[var(--text-muted)] transition-transform duration-300",
+              isExpanded && "rotate-180"
+            )}
           />
         </div>
       </div>
 
       {/* Drop indicator */}
       {isDropTarget && (
-        <div className="px-4 pb-2">
-          <div className="text-xs text-indigo-400 flex items-center gap-2">
-            <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
+        <div className="px-4 pb-3">
+          <div className="text-xs text-[var(--accent-primary)] flex items-center gap-2">
+            <span className="w-2 h-2 bg-[var(--accent-primary)] rounded-full animate-pulse" />
             Drop to import file
           </div>
         </div>
@@ -198,27 +218,27 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
 
       {/* Documents list */}
       {isExpanded && (
-        <div className="border-t border-[#2a2a4e] bg-[#12121f]">
+        <div className="border-t border-[var(--border)] bg-[var(--bg-base)]">
           {isLoadingDocuments ? (
             <div className="p-4 space-y-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-8 rounded skeleton" />
+                <div key={i} className="h-8 rounded-lg skeleton" />
               ))}
             </div>
           ) : documents && documents.length > 0 ? (
-            <ul className="divide-y divide-[#2a2a4e]">
+            <ul className="divide-y divide-[var(--border)]">
               {documents.map((doc) => (
                 <li
                   key={doc.name}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-[#1a1a2e] group"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--bg-elevated)] group transition-colors"
                 >
-                  <DocumentIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                  <span className="text-sm text-gray-300 truncate flex-1">
+                  <DocumentIcon className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
+                  <span className="text-sm text-[var(--text-secondary)] truncate flex-1 group-hover:text-[var(--text-primary)]">
                     {doc.displayName || getDocumentId(doc.name)}
                   </span>
                   <button
                     onClick={(e) => handleDeleteDocument(doc, e)}
-                    className="p-1.5 rounded hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition-all opacity-0 group-hover:opacity-100"
+                    className="p-1.5 rounded-lg hover:bg-[var(--danger)]/10 text-[var(--text-muted)] hover:text-[var(--danger)] transition-all opacity-0 group-hover:opacity-100"
                     title="Remove document"
                   >
                     <TrashIcon className="w-3.5 h-3.5" />
@@ -227,9 +247,11 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
               ))}
             </ul>
           ) : (
-            <div className="p-6 text-center text-gray-500 text-sm">
-              <p>No documents yet</p>
-              <p className="text-xs mt-1">Drag files here to import them</p>
+            <div className="p-6 text-center">
+              <p className="text-[var(--text-muted)] text-sm">No documents yet</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1 opacity-70">
+                Drag files here to import them
+              </p>
             </div>
           )}
         </div>
@@ -240,9 +262,9 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
 
 export function StoreCardSkeleton() {
   return (
-    <div className="bg-[#1a1a2e] border border-[#2a2a4e] rounded-xl p-4">
+    <div className="bg-[var(--bg-elevated)] shadow-[var(--neu-raised)] rounded-2xl p-4">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg skeleton" />
+        <div className="w-11 h-11 rounded-xl skeleton" />
         <div className="flex-1 space-y-2">
           <div className="h-4 w-1/2 rounded skeleton" />
           <div className="h-3 w-1/3 rounded skeleton" />
@@ -251,6 +273,3 @@ export function StoreCardSkeleton() {
     </div>
   );
 }
-
-
-
