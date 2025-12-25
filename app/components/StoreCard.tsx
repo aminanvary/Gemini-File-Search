@@ -56,7 +56,7 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
   const deleteDocument = useDeleteDocument();
   const importFile = useImportFile();
   const { data: documents, isLoading: isLoadingDocuments } = useDocuments(
-    isExpanded ? storeId : null
+    storeId
   );
 
   const [{ isOver, canDrop }, drop] = useDrop(
@@ -164,7 +164,7 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
           <h3 className="text-sm font-medium text-[var(--text-primary)] truncate">
             {store.displayName || storeId}
           </h3>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-sm text-[var(--text-secondary)] truncate">
             {documents?.length ?? "..."} documents • {formatDate(store.createTime)}
           </p>
         </div>
