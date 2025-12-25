@@ -1,0 +1,51 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest",
+        "--api-key",
+        "ctx7sk-5da825c5-d775-4e05-9108-c1d9a6907876"
+      ]
+    },
+    "exa": {
+      "command": "npx",
+      "args": ["-y", "exa-mcp-server@latest"],
+      "env": {
+        "EXA_API_KEY": "3fccf2c4-3dfa-4198-afb8-e8caae9fb959"
+      }
+    },
+    "n8n-mcp-native": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "supergateway",
+        "--streamableHttp",
+        "https://n8n.anvary.net/mcp-server/http",
+        "--header",
+        "authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YzNjMWNiZi0xODEzLTQ0NzYtODIxNi1jODYwNzE0MGUyMTEiLCJpc3MiOiJuOG4iLCJhdWQiOiJtY3Atc2VydmVyLWFwaSIsImp0aSI6IjI3NDlhNzRmLTRjNzktNDExNi1hNzgwLTA1OGQyNzRmNjQwOCIsImlhdCI6MTc2NDkxMzE4Nn0.PVIP-9ND_4hMJVxitNOxbXMbosYgyGcMX49rSfjn_3w"
+      ]
+    },
+    "n8n-mcp": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--init",
+        "-e",
+        "MCP_MODE=stdio",
+        "-e",
+        "LOG_LEVEL=error",
+        "-e",
+        "DISABLE_CONSOLE_OUTPUT=true",
+        "-e",
+        "N8N_API_URL=https://n8n.anvary.net",
+        "-e",
+        "N8N_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YzNjMWNiZi0xODEzLTQ0NzYtODIxNi1jODYwNzE0MGUyMTEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY0OTEyOTYyfQ.CMPyiRfhgxB5mYLQwjRrPXv4tRrffN4LWa3hJDf02Do",
+        "ghcr.io/czlonkowski/n8n-mcp:latest"
+      ]
+    }
+  }
+}

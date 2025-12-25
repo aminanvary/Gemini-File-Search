@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { UploadIcon, SpinnerIcon } from "./Icons";
 import { useUploadFile } from "@/lib/hooks";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export function UploadZone() {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -66,15 +67,13 @@ export function UploadZone() {
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
-      className={`
-        relative border-2 border-dashed rounded-xl p-6 text-center
-        transition-all duration-200 cursor-pointer
-        ${
-          isDraggingOver
-            ? "border-[#6366f1] bg-[#6366f1]/10"
-            : "border-[#2a2a4e] hover:border-[#6366f1]/50 hover:bg-[#1f1f35]"
-        }
-      `}
+      className={cn(
+        "relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300",
+        "bg-[var(--bg-base)] shadow-[var(--neu-inset)]",
+        isDraggingOver
+          ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/5 shadow-[var(--neu-inset),0_0_30px_rgba(245,158,11,0.15)]"
+          : "border-[var(--border)] hover:border-[var(--accent-primary)]/50 hover:bg-[var(--bg-elevated)]/50"
+      )}
     >
       <input
         type="file"
@@ -83,29 +82,35 @@ export function UploadZone() {
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
       />
 
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-4">
         {uploadFile.isPending ? (
           <>
-            <SpinnerIcon className="w-8 h-8 text-[#6366f1]" />
-            <p className="text-sm text-gray-400">Uploading...</p>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-[var(--accent-primary)]/20 animate-pulse-glow">
+              <SpinnerIcon className="w-7 h-7 text-[var(--accent-primary)]" />
+            </div>
+            <p className="text-sm text-[var(--text-secondary)]">Uploading...</p>
           </>
         ) : (
           <>
             <div
-              className={`
-                w-12 h-12 rounded-full flex items-center justify-center
-                ${isDraggingOver ? "bg-[#6366f1]/20 text-[#6366f1]" : "bg-[#2a2a4e] text-gray-400"}
-                transition-colors
-              `}
+              className={cn(
+                "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300",
+                "shadow-[var(--neu-raised)]",
+                isDraggingOver
+                  ? "bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] scale-110"
+                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
+              )}
             >
-              <UploadIcon className="w-6 h-6" />
+              <UploadIcon className="w-7 h-7" />
             </div>
             <div>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-[var(--text-primary)]">
                 Drop files here or{" "}
-                <span className="text-[#6366f1] hover:underline">browse</span>
+                <span className="text-[var(--accent-primary)] font-medium hover:text-[var(--accent-hover)] transition-colors">
+                  browse
+                </span>
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-[var(--text-muted)] mt-1.5">
                 Supports text, PDF, images, audio, and video files
               </p>
             </div>
@@ -115,6 +120,3 @@ export function UploadZone() {
     </div>
   );
 }
-
-
-
