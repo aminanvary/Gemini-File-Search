@@ -11,6 +11,8 @@ import {
 } from "./components/CreateStoreModal";
 import { ChatPanel } from "./components/ChatPanel";
 import { FolderIcon, FileIcon, ChatIcon } from "./components/Icons";
+import { Button } from "@/app/components/ui/button";
+import { Badge } from "@/app/components/ui/badge";
 
 export default function Dashboard() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -37,11 +39,11 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-[#2a2a4e] bg-[#0a0a14]/90 backdrop-blur-lg">
+      <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg-base)]/90 backdrop-blur-xl">
         <div className="max-w-[1800px] mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#a855f7] flex items-center justify-center">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center shadow-[var(--neu-raised),0_4px_20px_rgba(245,158,11,0.3)]">
                 <svg
                   className="w-6 h-6 text-white"
                   fill="none"
@@ -57,23 +59,23 @@ export default function Dashboard() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-100">
+                <h1 className="text-xl font-semibold text-[var(--text-primary)]">
                   Gemini File Search
                 </h1>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-[var(--text-muted)]">
                   Visualize and manage your libraries & files
                 </p>
               </div>
             </div>
             {/* Chat button in header - centered */}
             <div className="flex-1 flex justify-center">
-              <button
+              <Button
                 onClick={() => handleOpenChat()}
-                className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:from-[#818cf8] hover:to-[#a78bfa] rounded-xl text-white text-base font-semibold transition-all duration-200 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/50 hover:scale-105 active:scale-95"
+                className="gap-3 px-6 py-3 h-auto text-base font-semibold"
               >
                 <ChatIcon className="w-5 h-5" />
                 <span>Chat</span>
-              </button>
+              </Button>
             </div>
             <div className="w-[200px]"></div>
           </div>
@@ -87,30 +89,31 @@ export default function Dashboard() {
           <section>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <FolderIcon className="w-6 h-6 text-indigo-400" />
-                <h2 className="text-lg font-semibold text-gray-100">
+                <FolderIcon className="w-6 h-6 text-[var(--accent-primary)]" />
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">
                   Libraries
                 </h2>
                 {stores && (
-                  <span className="px-2 py-0.5 bg-[#2a2a4e] text-gray-400 text-xs rounded-full">
+                  <Badge variant="secondary">
                     {stores.length}
-                  </span>
+                  </Badge>
                 )}
               </div>
               <CreateStoreButton onClick={() => setIsCreateModalOpen(true)} />
             </div>
 
             {storesError ? (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
-                <p className="text-red-400 text-sm">
+              <div className="bg-[var(--danger)]/10 border border-[var(--danger)]/30 rounded-2xl p-6 text-center shadow-[var(--neu-raised)]">
+                <p className="text-[var(--danger)] text-sm">
                   Failed to load libraries. Make sure your GEMINI_API_KEY is set.
                 </p>
-                <button
+                <Button
+                  variant="destructive"
                   onClick={() => window.location.reload()}
-                  className="mt-3 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg text-red-400 text-sm transition-colors"
+                  className="mt-4"
                 >
                   Retry
-                </button>
+                </Button>
               </div>
             ) : isLoadingStores ? (
               <div className="space-y-4">
@@ -129,30 +132,27 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : (
-              <div className="bg-[#1a1a2e] border border-[#2a2a4e] rounded-xl p-12 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#2a2a4e] flex items-center justify-center">
-                  <FolderIcon className="w-8 h-8 text-gray-500" />
+              <div className="bg-[var(--bg-elevated)] shadow-[var(--neu-raised)] rounded-2xl p-12 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[var(--bg-surface)] shadow-[var(--neu-inset)] flex items-center justify-center">
+                  <FolderIcon className="w-8 h-8 text-[var(--text-muted)]" />
                 </div>
-                <h3 className="text-gray-300 font-medium mb-2">
+                <h3 className="text-[var(--text-primary)] font-medium mb-2">
                   No libraries yet
                 </h3>
-                <p className="text-gray-500 text-sm mb-4">
+                <p className="text-[var(--text-muted)] text-sm mb-6">
                   Create a library to organize your documents
                 </p>
-                <button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="px-4 py-2 bg-[#6366f1] hover:bg-[#818cf8] rounded-lg text-white text-sm font-medium transition-colors"
-                >
+                <Button onClick={() => setIsCreateModalOpen(true)}>
                   Create Library
-                </button>
+                </Button>
               </div>
             )}
 
             {/* Drop zone hint */}
             {stores && stores.length > 0 && (
-              <div className="mt-6 p-4 bg-[#12121f] border border-dashed border-[#2a2a4e] rounded-xl text-center">
-                <p className="text-sm text-gray-500">
-                  💡 Drag files from the right panel and drop them onto a library
+              <div className="mt-6 p-4 bg-[var(--bg-base)] shadow-[var(--neu-inset)] border border-dashed border-[var(--border)] rounded-2xl text-center">
+                <p className="text-sm text-[var(--text-muted)]">
+                  Drag files from the right panel and drop them onto a library
                   to import
                 </p>
               </div>
@@ -163,13 +163,13 @@ export default function Dashboard() {
           <section>
             <div className="flex items-center gap-3 mb-6">
               <FileIcon className="w-6 h-6 text-emerald-400" />
-              <h2 className="text-lg font-semibold text-gray-100">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">
                 Uploaded Files
               </h2>
               {files && (
-                <span className="px-2 py-0.5 bg-[#2a2a4e] text-gray-400 text-xs rounded-full">
+                <Badge variant="success">
                   {files.length}
-                </span>
+                </Badge>
               )}
             </div>
 
@@ -179,34 +179,67 @@ export default function Dashboard() {
             </div>
 
             {filesError ? (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
-                <p className="text-red-400 text-sm">Failed to load files.</p>
-                <button
+              <div className="bg-[var(--danger)]/10 border border-[var(--danger)]/30 rounded-2xl p-6 text-center shadow-[var(--neu-raised)]">
+                <p className="text-[var(--danger)] text-sm">Failed to load files.</p>
+                <Button
+                  variant="destructive"
                   onClick={() => window.location.reload()}
-                  className="mt-3 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg text-red-400 text-sm transition-colors"
+                  className="mt-4"
                 >
                   Retry
-                </button>
+                </Button>
               </div>
             ) : isLoadingFiles ? (
-              <div className="grid grid-cols-1 gap-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <FileCardSkeleton key={i} />
-                ))}
+              <div className="relative rounded-2xl bg-[var(--bg-elevated)] shadow-[var(--neu-raised)] p-4 border border-[var(--border)]/50">
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <FileCardSkeleton key={i} />
+                  ))}
+                </div>
               </div>
             ) : files && files.length > 0 ? (
-              <div className="grid grid-cols-1 gap-3 max-h-[calc(100vh-380px)] overflow-y-auto pr-2">
-                {files.map((file) => (
-                  <FileCard key={file.name} file={file} />
-                ))}
+              <div className="relative rounded-2xl bg-gradient-to-b from-[var(--bg-elevated)] to-[var(--bg-base)] shadow-[var(--neu-raised)] border border-[var(--border)]/50 overflow-hidden">
+                {/* Decorative header bar */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/80 via-teal-400/60 to-emerald-500/80" />
+                
+                {/* File count summary */}
+                <div className="px-5 py-4 border-b border-[var(--border)]/30 bg-[var(--bg-surface)]/30">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+                      {files.length} {files.length === 1 ? 'file' : 'files'} available
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-xs text-emerald-400">Ready to use</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Scrollable file list */}
+                <div className="max-h-[calc(100vh-440px)] overflow-y-auto scrollbar-thin p-3">
+                  <div className="space-y-2">
+                    {files.map((file, index) => (
+                      <div
+                        key={file.name}
+                        style={{ animationDelay: `${index * 50}ms` }}
+                        className="animate-fade-in opacity-0"
+                      >
+                        <FileCard file={file} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Bottom fade gradient */}
+                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[var(--bg-base)] to-transparent pointer-events-none" />
               </div>
             ) : (
-              <div className="bg-[#1a1a2e] border border-[#2a2a4e] rounded-xl p-12 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#2a2a4e] flex items-center justify-center">
-                  <FileIcon className="w-8 h-8 text-gray-500" />
+              <div className="bg-[var(--bg-elevated)] shadow-[var(--neu-raised)] rounded-2xl p-12 text-center border border-[var(--border)]/50">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[var(--bg-surface)] shadow-[var(--neu-inset)] flex items-center justify-center">
+                  <FileIcon className="w-8 h-8 text-[var(--text-muted)]" />
                 </div>
-                <h3 className="text-gray-300 font-medium mb-2">No files yet</h3>
-                <p className="text-gray-500 text-sm">
+                <h3 className="text-[var(--text-primary)] font-medium mb-2">No files yet</h3>
+                <p className="text-[var(--text-muted)] text-sm">
                   Upload files to get started. They can then be added to libraries.
                 </p>
               </div>
@@ -214,7 +247,7 @@ export default function Dashboard() {
 
             {/* File info */}
             {files && files.length > 0 && (
-              <div className="mt-4 text-xs text-gray-500 text-center">
+              <div className="mt-4 text-xs text-[var(--text-muted)] text-center">
                 Files are automatically deleted after 48 hours
               </div>
             )}
