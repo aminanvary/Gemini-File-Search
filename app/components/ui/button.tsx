@@ -19,6 +19,13 @@ const buttonVariants = cva(
         ghost:
           "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]",
         link: "text-[var(--accent-primary)] underline-offset-4 hover:underline",
+        // Neumorphic variants - softer, more tactile appearance
+        neumorphic:
+          "bg-[linear-gradient(145deg,var(--bg-surface),var(--bg-elevated))] text-[var(--text-primary)] rounded-2xl shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light)] border border-[var(--border)]/30 hover:shadow-[8px_8px_16px_var(--shadow-dark),-8px_-8px_16px_var(--shadow-light)] hover:-translate-y-0.5 active:shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] active:translate-y-0",
+        "neumorphic-accent":
+          "bg-[linear-gradient(145deg,#1f1f2a,#1a1a22)] text-[var(--accent-primary)] rounded-2xl shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light)] border border-[var(--accent-primary)]/20 hover:shadow-[8px_8px_16px_var(--shadow-dark),-8px_-8px_16px_var(--shadow-light),0_0_20px_rgba(245,158,11,0.15)] hover:-translate-y-0.5 hover:border-[var(--accent-primary)]/40 active:shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] active:translate-y-0",
+        "neumorphic-glow":
+          "bg-[linear-gradient(145deg,#252532,#1e1e28)] text-[var(--accent-primary)] rounded-2xl shadow-[5px_5px_10px_var(--shadow-dark),-5px_-5px_10px_var(--shadow-light),inset_0_1px_0_rgba(255,255,255,0.05)] border border-[var(--accent-primary)]/25 hover:shadow-[6px_6px_14px_var(--shadow-dark),-6px_-6px_14px_var(--shadow-light),0_0_25px_rgba(245,158,11,0.2),inset_0_1px_0_rgba(255,255,255,0.08)] hover:-translate-y-0.5 hover:text-[var(--accent-hover)] active:shadow-[inset_3px_3px_6px_var(--shadow-dark),inset_-3px_-3px_6px_var(--shadow-light)] active:translate-y-0",
       },
       size: {
         default: "h-10 px-4 py-2",

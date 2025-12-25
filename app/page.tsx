@@ -71,7 +71,8 @@ export default function Dashboard() {
             <div className="flex-1 flex justify-center">
               <Button
                 onClick={() => handleOpenChat()}
-                className="gap-3 px-6 py-3 h-auto text-base font-semibold"
+                variant="neumorphic-glow"
+                className="gap-3 px-7 py-3.5 h-auto text-base font-semibold"
               >
                 <ChatIcon className="w-5 h-5" />
                 <span>Chat</span>

@@ -94,8 +94,8 @@ export function CreateStoreModal({ isOpen, onClose }: CreateStoreModalProps) {
 
 export function CreateStoreButton({ onClick }: { onClick: () => void }) {
   return (
-    <Button onClick={onClick} className="gap-2">
-      <PlusIcon className="w-5 h-5" />
+    <Button onClick={onClick} variant="neumorphic-accent" className="gap-2.5 px-5">
+      <PlusIcon className="w-4 h-4" />
       New Library
     </Button>
   );
