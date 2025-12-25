@@ -134,10 +134,6 @@ export function FileCard({ file }: FileCardProps) {
             <h3 className="text-sm font-medium text-[var(--text-primary)] truncate flex-1">
               {file.displayName || getFileId(file.name)}
             </h3>
-            {/* Drag indicator */}
-            <div className="opacity-0 group-hover:opacity-60 transition-opacity flex items-center gap-1">
-              <DragIcon className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            </div>
           </div>
           <div className="flex items-center gap-3 mt-1">
             <span className={cn(
@@ -162,20 +158,27 @@ export function FileCard({ file }: FileCardProps) {
           </div>
         </div>
 
-        {/* Delete button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleDelete}
-          disabled={deleteFile.isPending}
-          className="opacity-0 group-hover:opacity-100 h-8 w-8 text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-all"
-        >
-          {deleteFile.isPending ? (
-            <SpinnerIcon className="w-4 h-4" />
-          ) : (
-            <TrashIcon className="w-4 h-4" />
-          )}
-        </Button>
+        {/* Action buttons - aligned together */}
+        <div className="flex items-center gap-2">
+          {/* Drag indicator */}
+          <div className="opacity-0 group-hover:opacity-60 transition-opacity flex items-center justify-center h-8 w-8">
+            <DragIcon className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+          </div>
+          {/* Delete button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDelete}
+            disabled={deleteFile.isPending}
+            className="opacity-0 group-hover:opacity-100 h-8 w-8 text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-all"
+          >
+            {deleteFile.isPending ? (
+              <SpinnerIcon className="w-4 h-4" />
+            ) : (
+              <TrashIcon className="w-4 h-4" />
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
