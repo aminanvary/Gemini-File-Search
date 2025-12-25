@@ -151,10 +151,12 @@ export default function Dashboard() {
 
             {/* Drop zone hint */}
             {stores && stores.length > 0 && (
-              <div className="mt-6 p-4 bg-[var(--bg-base)] shadow-[var(--neu-inset)] border border-dashed border-[var(--border)] rounded-2xl text-center">
-                <p className="text-sm text-[var(--text-muted)]">
-                  Drag files from the right panel and drop them onto a library
-                  to import
+              <div className="mt-6 p-4 bg-gradient-to-r from-[var(--accent-primary)]/15 to-[var(--accent-secondary)]/10 border-2 border-dashed border-[var(--accent-primary)]/50 rounded-2xl flex items-center justify-center gap-3">
+                <svg className="w-5 h-5 text-[var(--accent-primary)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm text-[var(--text-secondary)] font-medium">
+                  Drag files from the right panel and drop them onto a library to import
                 </p>
               </div>
             )}
