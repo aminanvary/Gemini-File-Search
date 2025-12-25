@@ -196,6 +196,23 @@ export function ChatIcon({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
+export function ChatIconSolid({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 3C6.477 3 2 6.582 2 11c0 1.797.644 3.455 1.737 4.805L2.2 19.553a.75.75 0 00.947.948l3.748-1.537A10.526 10.526 0 0012 20c5.523 0 10-3.582 10-8s-4.477-8-10-8zM7 11a1.25 1.25 0 112.5 0A1.25 1.25 0 017 11zm4.25 0a1.25 1.25 0 112.5 0 1.25 1.25 0 01-2.5 0zm5.5-1.25a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z"
+      />
+    </svg>
+  );
+}
+
 export function ChatIconFancy({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg

@@ -7,7 +7,8 @@ import {
   XIcon,
   SendIcon,
   SpinnerIcon,
-  SparklesIcon,
+  ChatIconFancy,
+  ChatIconSolid,
   StopIcon,
   FolderIcon,
 } from "./Icons";
@@ -102,7 +103,7 @@ export function ChatPanel({ isOpen, onClose, initialStoreId }: ChatPanelProps) {
         <header className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-[var(--border)] bg-[var(--bg-surface)]">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center shadow-[var(--neu-raised),0_4px_20px_rgba(245,158,11,0.3)]">
-              <SparklesIcon className="w-5 h-5 text-white" />
+              <ChatIconSolid className="w-5 h-5 text-white" />
             </div>
             <div>
               <DialogTitle className="text-lg font-semibold text-[var(--text-primary)]">
@@ -187,7 +188,7 @@ export function ChatPanel({ isOpen, onClose, initialStoreId }: ChatPanelProps) {
           ) : messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 shadow-[var(--neu-raised)] flex items-center justify-center mb-4 animate-float">
-                <SparklesIcon className="w-8 h-8 text-[var(--accent-primary)]" />
+                <ChatIconFancy className="w-8 h-8" />
               </div>
               <h3 className="text-[var(--text-primary)] font-medium mb-2">
                 Start a Conversation
@@ -213,7 +214,7 @@ export function ChatPanel({ isOpen, onClose, initialStoreId }: ChatPanelProps) {
                     className={cn(
                       "max-w-[80%] rounded-2xl px-4 py-3",
                       message.role === "user"
-                        ? "bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white shadow-[var(--neu-raised),0_4px_20px_rgba(245,158,11,0.2)]"
+                        ? "bg-gradient-to-br from-amber-600/80 to-amber-700/90 text-amber-50 shadow-[var(--neu-raised)] border border-amber-500/20"
                         : "bg-[var(--bg-elevated)] shadow-[var(--neu-raised)] border border-[var(--border)] text-[var(--text-primary)]"
                     )}
                   >
@@ -272,8 +273,8 @@ export function ChatPanel({ isOpen, onClose, initialStoreId }: ChatPanelProps) {
           onSubmit={handleSubmit}
           className="flex-shrink-0 px-6 py-4 border-t border-[var(--border)] bg-[var(--bg-elevated)]"
         >
-          <div className="flex items-end gap-3">
-            <div className="flex-1 relative">
+          <div className="flex items-stretch gap-3">
+            <div className="flex-1 relative flex">
               <textarea
                 ref={inputRef}
                 value={inputValue}
@@ -287,35 +288,51 @@ export function ChatPanel({ isOpen, onClose, initialStoreId }: ChatPanelProps) {
                 disabled={!selectedStoreId || isLoading}
                 rows={1}
                 className={cn(
-                  "w-full px-4 py-3 rounded-xl text-sm resize-none transition-all duration-200",
+                  "w-full px-4 py-3 rounded-2xl text-sm resize-none transition-all duration-200",
                   "bg-[var(--bg-base)] shadow-[var(--neu-inset)]",
                   "text-[var(--text-primary)] placeholder-[var(--text-muted)]",
                   "focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/30",
-                  "disabled:opacity-50"
+                  "disabled:opacity-50",
+                  "min-h-[52px]"
                 )}
-                style={{ minHeight: "48px", maxHeight: "120px" }}
+                style={{ maxHeight: "120px" }}
               />
             </div>
 
             {isLoading ? (
-              <Button
+              <button
                 type="button"
                 onClick={cancelRequest}
-                variant="destructive"
-                size="icon"
-                className="w-12 h-12 rounded-xl"
+                className="group relative w-[52px] h-[52px] rounded-2xl flex-shrink-0
+                  bg-gradient-to-br from-rose-500 to-red-600
+                  shadow-[var(--neu-raised),0_4px_16px_rgba(239,68,68,0.3)]
+                  hover:shadow-[var(--neu-raised),0_6px_24px_rgba(239,68,68,0.4)]
+                  hover:scale-105 active:scale-95
+                  transition-all duration-200 ease-out
+                  flex items-center justify-center"
               >
-                <StopIcon className="w-5 h-5" />
-              </Button>
+                <StopIcon className="w-5 h-5 text-white" />
+              </button>
             ) : (
-              <Button
+              <button
                 type="submit"
                 disabled={!selectedStoreId || !inputValue.trim()}
-                size="icon"
-                className="w-12 h-12 rounded-xl"
+                className={cn(
+                  "group relative w-[52px] h-[52px] rounded-2xl flex-shrink-0",
+                  "bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)]",
+                  "shadow-[var(--neu-raised),0_4px_16px_rgba(245,158,11,0.3)]",
+                  "hover:shadow-[var(--neu-raised),0_6px_24px_rgba(245,158,11,0.4)]",
+                  "hover:scale-105 active:scale-95",
+                  "transition-all duration-200 ease-out",
+                  "flex items-center justify-center",
+                  "disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-[var(--neu-raised)]"
+                )}
               >
-                <SendIcon className="w-5 h-5" />
-              </Button>
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-400/0 to-orange-500/0 
+                  group-hover:from-amber-400/20 group-hover:to-orange-500/20 transition-all duration-300" />
+                <SendIcon className="w-5 h-5 text-white relative z-10 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </button>
             )}
           </div>
 
