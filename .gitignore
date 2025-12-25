@@ -37,6 +37,15 @@ yarn-error.log*
 # vercel
 .vercel
 
+# IDE and tool config directories
+.cursor/
+.claude/
+.vscode/
+
+# MCP config files (may contain tokens)
+mcp.json
+*.mcp.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
