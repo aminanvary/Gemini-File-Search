@@ -242,16 +242,114 @@ export function ChatPanel({ isOpen, onClose, initialStoreId }: ChatPanelProps) {
                           </p>
                           <div className="space-y-1">
                             {message.groundingMetadata.groundingChunks.map(
-                              (chunk, idx) => (
-                                <div
-                                  key={idx}
-                                  className="text-xs text-[var(--accent-primary)] bg-[var(--bg-base)] rounded-lg px-2 py-1 shadow-[var(--neu-subtle)]"
-                                >
-                                  {chunk.retrievedContext?.documentUri ||
-                                    chunk.web?.title ||
-                                    `Source ${idx + 1}`}
-                                </div>
-                              )
+                              (chunk, idx) => {
+                                const webUri = chunk.web?.uri;
+                                const retrievedUri =
+                                  chunk.retrievedContext?.uri;
+                                const retrievedText =
+                                  chunk.retrievedContext?.text;
+                                const retrievedTitle =
+                                  chunk.retrievedContext?.title;
+                                const pageSpan =
+                                  chunk.retrievedContext?.ragChunk?.pageSpan;
+
+                                // Extract page numbers from text content (e.g., "--- PAGE 1 ---")
+                                let extractedPages: number[] = [];
+                                if (retrievedText) {
+                                  const pageMatches = retrievedText.matchAll(
+                                    /---\s*PAGE\s+(\d+)\s*---/gi
+                                  );
+                                  extractedPages = [
+                                    ...new Set(
+                                      [...pageMatches].map((m) =>
+                                        parseInt(m[1], 10)
+                                      )
+                                    ),
+                                  ].sort((a, b) => a - b);
+                                }
+
+                                // Build page info string from pageSpan or extracted pages
+                                let pageInfo = "";
+                                if (pageSpan?.firstPage !== undefined) {
+                                  if (
+                                    pageSpan.lastPage !== undefined &&
+                                    pageSpan.lastPage !== pageSpan.firstPage
+                                  ) {
+                                    pageInfo = ` (pp. ${pageSpan.firstPage}-${pageSpan.lastPage})`;
+                                  } else {
+                                    pageInfo = ` (p. ${pageSpan.firstPage})`;
+                                  }
+                                } else if (extractedPages.length > 0) {
+                                  if (extractedPages.length === 1) {
+                                    pageInfo = ` (p. ${extractedPages[0]})`;
+                                  } else {
+                                    pageInfo = ` (pp. ${extractedPages[0]}-${
+                                      extractedPages[extractedPages.length - 1]
+                                    })`;
+                                  }
+                                }
+
+                                // Use title if available, otherwise generic "Source X"
+                                const baseName =
+                                  retrievedTitle ||
+                                  chunk.web?.title ||
+                                  `Source ${idx + 1}`;
+                                const displayText = baseName + pageInfo;
+
+                                // For web sources with URI, render as a link
+                                if (webUri) {
+                                  return (
+                                    <a
+                                      key={idx}
+                                      href={webUri}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="block text-xs text-[var(--accent-primary)] bg-[var(--bg-base)] rounded-lg px-2 py-1 shadow-[var(--neu-subtle)] hover:bg-[var(--bg-elevated)] cursor-pointer transition-colors"
+                                    >
+                                      {displayText}
+                                    </a>
+                                  );
+                                }
+
+                                // For document sources, make them expandable
+                                return (
+                                  <details key={idx} className="group">
+                                    <summary className="text-xs text-[var(--accent-primary)] bg-[var(--bg-base)] rounded-lg px-2 py-1 shadow-[var(--neu-subtle)] hover:bg-[var(--bg-elevated)] cursor-pointer transition-colors list-none flex items-center gap-1">
+                                      <span className="truncate flex-1">
+                                        📄 {displayText}
+                                      </span>
+                                      <svg
+                                        className="w-3 h-3 flex-shrink-0 transition-transform group-open:rotate-180"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M19 9l-7 7-7-7"
+                                        />
+                                      </svg>
+                                    </summary>
+                                    <div className="mt-1 text-xs text-[var(--text-secondary)] bg-[var(--bg-base)]/50 rounded-lg px-2 py-2 border border-[var(--border)]">
+                                      {retrievedText ? (
+                                        <p className="whitespace-pre-wrap">
+                                          {retrievedText}
+                                        </p>
+                                      ) : retrievedUri ? (
+                                        <p className="text-[var(--text-muted)] break-all">
+                                          {retrievedUri}
+                                        </p>
+                                      ) : (
+                                        <p className="text-[var(--text-muted)]">
+                                          Referenced in response
+                                        </p>
+                                      )}
+                                    </div>
+                                  </details>
+                                );
+                              }
                             )}
                           </div>
                         </div>
@@ -337,8 +435,10 @@ export function ChatPanel({ isOpen, onClose, initialStoreId }: ChatPanelProps) {
                 )}
               >
                 {/* Glow effect on hover */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-400/0 to-orange-500/0 
-                  group-hover:from-amber-400/20 group-hover:to-orange-500/20 transition-all duration-300" />
+                <div
+                  className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-400/0 to-orange-500/0 
+                  group-hover:from-amber-400/20 group-hover:to-orange-500/20 transition-all duration-300"
+                />
                 <SendIcon className="w-5 h-5 text-white relative z-10 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </button>
             )}

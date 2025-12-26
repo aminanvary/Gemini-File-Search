@@ -39,14 +39,26 @@ export interface DragItem {
 }
 
 // Chat types
+export interface RagChunkPageSpan {
+  firstPage?: number;
+  lastPage?: number;
+}
+
+export interface RagChunk {
+  pageSpan?: RagChunkPageSpan;
+  text?: string;
+}
+
 export interface GroundingChunk {
   web?: {
     uri?: string;
     title?: string;
   };
   retrievedContext?: {
-    documentUri?: string;
-    snippet?: string;
+    uri?: string;
+    text?: string;
+    title?: string;
+    ragChunk?: RagChunk;
   };
 }
 
