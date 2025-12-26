@@ -19,7 +19,7 @@
 <br />
 
 <p align="center">
-  <img src="preview.png" alt="Gemini File Search Preview" width="100%" style="border-radius: 12px;" />
+  <img src="public/preview.png" alt="Gemini File Search Preview" width="100%" style="border-radius: 12px;" />
 </p>
 
 ---
