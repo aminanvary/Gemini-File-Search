@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono, Vazirmatn } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -11,6 +11,11 @@ const spaceGrotesk = Space_Grotesk({
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
+});
+
+const vazirmatn = Vazirmatn({
+  variable: "--font-persian",
+  subsets: ["arabic"],
 });
 
 export const metadata: Metadata = {
@@ -26,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased font-sans bg-[var(--bg-base)] text-[var(--text-primary)] min-h-screen`}
+        className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} ${vazirmatn.variable} antialiased font-sans bg-[var(--bg-base)] text-[var(--text-primary)] min-h-screen`}
       >
         <Providers>{children}</Providers>
       </body>

@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/app/components/ui/select";
 import { Button } from "@/app/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, isPersianText } from "@/lib/utils";
 
 interface ChatPanelProps {
   isOpen: boolean;
@@ -218,7 +218,13 @@ export function ChatPanel({ isOpen, onClose, initialStoreId }: ChatPanelProps) {
                         : "bg-[var(--bg-elevated)] shadow-[var(--neu-raised)] border border-[var(--border)] text-[var(--text-primary)]"
                     )}
                   >
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                    <div
+                      className={cn(
+                        "whitespace-pre-wrap text-sm leading-relaxed",
+                        isPersianText(message.content || "") && "font-persian"
+                      )}
+                      dir={isPersianText(message.content || "") ? "rtl" : "ltr"}
+                    >
                       {message.content || (
                         <span className="flex items-center gap-2 text-[var(--text-muted)]">
                           <SpinnerIcon className="w-4 h-4" />
@@ -287,13 +293,15 @@ export function ChatPanel({ isOpen, onClose, initialStoreId }: ChatPanelProps) {
                 }
                 disabled={!selectedStoreId || isLoading}
                 rows={1}
+                dir={isPersianText(inputValue) ? "rtl" : "ltr"}
                 className={cn(
                   "w-full px-4 py-3 rounded-2xl text-sm resize-none transition-all duration-200",
                   "bg-[var(--bg-base)] shadow-[var(--neu-inset)]",
                   "text-[var(--text-primary)] placeholder-[var(--text-muted)]",
                   "focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/30",
                   "disabled:opacity-50",
-                  "min-h-[52px]"
+                  "min-h-[52px]",
+                  isPersianText(inputValue) && "font-persian"
                 )}
                 style={{ maxHeight: "120px" }}
               />
