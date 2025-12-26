@@ -449,7 +449,7 @@ export function ChatPanel({ isOpen, onClose, initialStoreId }: ChatPanelProps) {
             <button
               type="button"
               onClick={clearMessages}
-              className="mt-3 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+              className="mt-3 text-sm font-medium text-[var(--accent-primary)] hover:text-[var(--accent-secondary)] underline underline-offset-2 hover:underline-offset-4 transition-all duration-200 cursor-pointer px-2 py-1 rounded-lg hover:bg-[var(--accent-primary)]/10 active:bg-[var(--accent-primary)]/20 active:scale-95"
             >
               Clear conversation
             </button>
