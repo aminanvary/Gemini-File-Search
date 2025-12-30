@@ -8,27 +8,121 @@ import { cn } from "@/lib/utils";
 
 export function UploadZone() {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [uploadingCount, setUploadingCount] = useState(0);
   const uploadFile = useUploadFile();
 
+  // Helper function to process directory entries recursively
+  const processDirectoryEntry = async (
+    entry: FileSystemEntry,
+    path: string = ""
+  ): Promise<File[]> => {
+    const files: File[] = [];
+
+    if (entry.isFile) {
+      return new Promise((resolve) => {
+        (entry as FileSystemFileEntry).file((file: File) => {
+          // Create a new File with the preserved path
+          const fileWithPath = new File([file], path ? `${path}/${file.name}` : file.name, {
+            type: file.type,
+            lastModified: file.lastModified,
+          });
+          resolve([fileWithPath]);
+        });
+      });
+    } else if (entry.isDirectory) {
+      const dirReader = (entry as FileSystemDirectoryEntry).createReader();
+      const entries = await new Promise<FileSystemEntry[]>((resolve) => {
+        const entries: FileSystemEntry[] = [];
+        const readEntries = () => {
+          dirReader.readEntries((results) => {
+            if (results.length === 0) {
+              resolve(entries);
+            } else {
+              entries.push(...results);
+              readEntries();
+            }
+          });
+        };
+        readEntries();
+      });
+
+      for (const subEntry of entries) {
+        const subPath = path ? `${path}/${subEntry.name}` : subEntry.name;
+        const subFiles = await processDirectoryEntry(subEntry, subPath);
+        files.push(...subFiles);
+      }
+    }
+
+    return files;
+  };
+
   const handleDrop = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
+    async (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setIsDraggingOver(false);
 
-      const files = Array.from(e.dataTransfer.files);
+      const items = Array.from(e.dataTransfer.items);
+      const files: File[] = [];
+
+      // Check if any items are directories
+      const hasDirectories = items.some(
+        (item) => item.webkitGetAsEntry && item.webkitGetAsEntry()?.isDirectory
+      );
+
+      if (hasDirectories) {
+        // Process directory drops
+        for (const item of items) {
+          const entry = item.webkitGetAsEntry();
+          if (entry) {
+            const entryFiles = await processDirectoryEntry(entry);
+            files.push(...entryFiles);
+          }
+        }
+      } else {
+        // Process regular file drops
+        const fileList = Array.from(e.dataTransfer.files);
+        files.push(...fileList);
+      }
+
       if (files.length === 0) return;
 
+      setUploadingCount(files.length);
+      let successCount = 0;
+      let errorCount = 0;
+
       // Upload all files
-      files.forEach((file) => {
-        uploadFile.mutate(file, {
-          onSuccess: () => {
-            toast.success(`Uploaded "${file.name}"`);
+      const uploadPromises = files.map((file) =>
+        uploadFile.mutateAsync(file).then(
+          () => {
+            successCount++;
+            if (successCount + errorCount === files.length) {
+              setUploadingCount(0);
+              if (files.length > 1) {
+                toast.success(
+                  `Uploaded ${successCount} of ${files.length} files${errorCount > 0 ? ` (${errorCount} failed)` : ""}`
+                );
+              } else {
+                toast.success(`Uploaded "${file.name}"`);
+              }
+            }
           },
-          onError: () => {
-            toast.error(`Failed to upload "${file.name}"`);
-          },
-        });
-      });
+          () => {
+            errorCount++;
+            if (successCount + errorCount === files.length) {
+              setUploadingCount(0);
+              if (files.length > 1) {
+                toast.error(
+                  `Failed to upload ${errorCount} of ${files.length} files${successCount > 0 ? ` (${successCount} succeeded)` : ""}`
+                );
+              } else {
+                toast.error(`Failed to upload "${file.name}"`);
+              }
+            }
+          }
+        )
+      );
+
+      await Promise.allSettled(uploadPromises);
     },
     [uploadFile]
   );
@@ -44,18 +138,62 @@ export function UploadZone() {
   }, []);
 
   const handleFileSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || []);
-      files.forEach((file) => {
-        uploadFile.mutate(file, {
-          onSuccess: () => {
-            toast.success(`Uploaded "${file.name}"`);
-          },
-          onError: () => {
-            toast.error(`Failed to upload "${file.name}"`);
-          },
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const fileList = e.target.files;
+      if (!fileList || fileList.length === 0) return;
+
+      const files = Array.from(fileList);
+      
+      // Check if files have webkitRelativePath (folder selection)
+      const hasFolderStructure = files.some((file) => (file as any).webkitRelativePath);
+      
+      setUploadingCount(files.length);
+      let successCount = 0;
+      let errorCount = 0;
+
+      // Upload all files, preserving folder structure in displayName
+      const uploadPromises = files.map((file) => {
+        // Use webkitRelativePath if available, otherwise use file.name
+        const displayName = (file as any).webkitRelativePath || file.name;
+        
+        // Create a new File with the displayName preserved
+        const fileToUpload = new File([file], displayName, {
+          type: file.type,
+          lastModified: file.lastModified,
         });
+
+        return uploadFile.mutateAsync(fileToUpload).then(
+          () => {
+            successCount++;
+            if (successCount + errorCount === files.length) {
+              setUploadingCount(0);
+              if (files.length > 1) {
+                toast.success(
+                  `Uploaded ${successCount} of ${files.length} files${errorCount > 0 ? ` (${errorCount} failed)` : ""}`
+                );
+              } else {
+                toast.success(`Uploaded "${displayName}"`);
+              }
+            }
+          },
+          () => {
+            errorCount++;
+            if (successCount + errorCount === files.length) {
+              setUploadingCount(0);
+              if (files.length > 1) {
+                toast.error(
+                  `Failed to upload ${errorCount} of ${files.length} files${successCount > 0 ? ` (${successCount} succeeded)` : ""}`
+                );
+              } else {
+                toast.error(`Failed to upload "${displayName}"`);
+              }
+            }
+          }
+        );
       });
+
+      await Promise.allSettled(uploadPromises);
+      
       // Reset input
       e.target.value = "";
     },
@@ -92,17 +230,20 @@ export function UploadZone() {
       <input
         type="file"
         multiple
+        webkitdirectory=""
         onChange={handleFileSelect}
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
       />
 
       <div className="relative flex flex-col items-center gap-5">
-        {uploadFile.isPending ? (
+        {uploadFile.isPending || uploadingCount > 0 ? (
           <>
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br from-[var(--accent-primary)]/30 to-[var(--accent-secondary)]/20 shadow-[4px_4px_12px_rgba(0,0,0,0.2),-2px_-2px_8px_rgba(255,255,255,0.02),0_0_20px_rgba(245,158,11,0.3)] animate-pulse">
               <SpinnerIcon className="w-8 h-8 text-[var(--accent-primary)]" />
             </div>
-            <p className="text-sm font-medium text-[var(--text-secondary)]">Uploading...</p>
+            <p className="text-sm font-medium text-[var(--text-secondary)]">
+              {uploadingCount > 1 ? `Uploading ${uploadingCount} files...` : "Uploading..."}
+            </p>
           </>
         ) : (
           <>
@@ -127,7 +268,7 @@ export function UploadZone() {
                 </span>
               </p>
               <p className="text-sm text-[var(--text-muted)]">
-                Max 100 MB per file • Documents, code, and text files
+                Max 100 MB per file • Documents, code, and text files • Folders supported
               </p>
             </div>
           </>

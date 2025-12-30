@@ -20,6 +20,7 @@ import {
   useDeleteStore,
   useDocuments,
   useImportFile,
+  useImportFiles,
   useDeleteDocument,
 } from "@/lib/hooks";
 import { toast } from "sonner";
@@ -55,6 +56,7 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
   const deleteStore = useDeleteStore();
   const deleteDocument = useDeleteDocument();
   const importFile = useImportFile();
+  const importFiles = useImportFiles();
   const { data: documents, isLoading: isLoadingDocuments } = useDocuments(
     storeId
   );
@@ -63,28 +65,58 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
     () => ({
       accept: DragTypes.FILE,
       drop: (item: DragItem) => {
-        const fileName = item.file.name;
-        importFile.mutate(
-          { storeId, fileName },
-          {
-            onSuccess: () => {
-              toast.success(
-                `Imported "${item.file.displayName}" to "${store.displayName}"`
-              );
-              setIsExpanded(true);
-            },
-            onError: () => {
-              toast.error("Failed to import file");
-            },
-          }
-        );
+        // Check if multiple files are being dragged
+        if (item.files && item.files.length > 1) {
+          // Bulk import
+          const fileNames = item.files.map((f) => f.name);
+          importFiles.mutate(
+            { storeId, fileNames },
+            {
+              onSuccess: (result) => {
+                const successCount = result.results?.filter((r) => r.success).length || 0;
+                const failCount = result.results?.filter((r) => !r.success).length || 0;
+                
+                if (failCount === 0) {
+                  toast.success(
+                    `Imported ${successCount} file${successCount !== 1 ? "s" : ""} to "${store.displayName}"`
+                  );
+                } else {
+                  toast.warning(
+                    `Imported ${successCount} of ${item.files.length} file${item.files.length !== 1 ? "s" : ""} to "${store.displayName}"${failCount > 0 ? ` (${failCount} failed)` : ""}`
+                  );
+                }
+                setIsExpanded(true);
+              },
+              onError: () => {
+                toast.error("Failed to import files");
+              },
+            }
+          );
+        } else {
+          // Single file import
+          const fileName = item.file.name;
+          importFile.mutate(
+            { storeId, fileName },
+            {
+              onSuccess: () => {
+                toast.success(
+                  `Imported "${item.file.displayName}" to "${store.displayName}"`
+                );
+                setIsExpanded(true);
+              },
+              onError: () => {
+                toast.error("Failed to import file");
+              },
+            }
+          );
+        }
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         canDrop: monitor.canDrop(),
       }),
     }),
-    [storeId, store.displayName]
+    [storeId, store.displayName, importFile, importFiles]
   );
 
   const handleDeleteStore = (e: React.MouseEvent) => {
@@ -135,7 +167,7 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
           : canDrop
             ? "border-[var(--accent-primary)] shadow-[var(--neu-raised),0_0_20px_rgba(245,158,11,0.15)]"
             : "border-[var(--border)]/50 hover:border-[var(--accent-primary)]/30 hover:shadow-[var(--neu-float)]",
-        importFile.isPending && "animate-pulse-glow"
+        (importFile.isPending || importFiles.isPending) && "animate-pulse-glow"
       )}
     >
       {/* Header */}
@@ -160,7 +192,7 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
         >
           {/* Inner glow */}
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-transparent" />
-          {importFile.isPending ? (
+          {(importFile.isPending || importFiles.isPending) ? (
             <SpinnerIcon className="w-5 h-5 text-[var(--accent-hover)] relative z-10" />
           ) : (
             <FolderIcon className={cn(
@@ -235,7 +267,9 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-primary)] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent-hover)]"></span>
             </span>
-            <span className="text-xs font-medium text-[var(--accent-hover)]">Drop to import file</span>
+            <span className="text-xs font-medium text-[var(--accent-hover)]">
+              Drop to import file{importFiles.isPending ? "s" : ""}
+            </span>
           </div>
         </div>
       )}
