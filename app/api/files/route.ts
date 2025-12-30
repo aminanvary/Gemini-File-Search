@@ -63,14 +63,39 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     
+    // Detect MIME type from file extension if browser didn't provide one or provided generic type
+    let mimeType = file.type;
+    if (!mimeType || mimeType === "application/octet-stream") {
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      const mimeTypeMap: Record<string, string> = {
+        'md': 'text/markdown',
+        'txt': 'text/plain',
+        'pdf': 'application/pdf',
+        'doc': 'application/msword',
+        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'xls': 'application/vnd.ms-excel',
+        'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'ppt': 'application/vnd.ms-powerpoint',
+        'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'csv': 'text/csv',
+        'json': 'application/json',
+        'html': 'text/html',
+        'htm': 'text/html',
+        'rtf': 'application/rtf',
+      };
+      if (extension && mimeTypeMap[extension]) {
+        mimeType = mimeTypeMap[extension];
+      }
+    }
+    
     // Create a Blob from the buffer for the SDK
-    const blob = new Blob([buffer], { type: file.type });
+    const blob = new Blob([buffer], { type: mimeType });
     
     const uploadedFile = await ai.files.upload({
       file: blob,
       config: {
         displayName: file.name,
-        mimeType: file.type,
+        mimeType: mimeType,
       },
     });
     
