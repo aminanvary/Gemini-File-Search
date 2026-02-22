@@ -19,29 +19,38 @@ export function UploadZone() {
     const files: File[] = [];
 
     if (entry.isFile) {
-      return new Promise((resolve) => {
-        (entry as FileSystemFileEntry).file((file: File) => {
-          // Create a new File with the preserved path
-          const fileWithPath = new File([file], path ? `${path}/${file.name}` : file.name, {
-            type: file.type,
-            lastModified: file.lastModified,
-          });
-          resolve([fileWithPath]);
-        });
+      return new Promise((resolve, reject) => {
+        (entry as FileSystemFileEntry).file(
+          (file: File) => {
+            const fileWithPath = new File([file], path ? `${path}/${file.name}` : file.name, {
+              type: file.type,
+              lastModified: file.lastModified,
+            });
+            resolve([fileWithPath]);
+          },
+          (error: DOMException) => {
+            reject(error);
+          }
+        );
       });
     } else if (entry.isDirectory) {
       const dirReader = (entry as FileSystemDirectoryEntry).createReader();
-      const entries = await new Promise<FileSystemEntry[]>((resolve) => {
+      const entries = await new Promise<FileSystemEntry[]>((resolve, reject) => {
         const entries: FileSystemEntry[] = [];
         const readEntries = () => {
-          dirReader.readEntries((results) => {
-            if (results.length === 0) {
-              resolve(entries);
-            } else {
-              entries.push(...results);
-              readEntries();
+          dirReader.readEntries(
+            (results) => {
+              if (results.length === 0) {
+                resolve(entries);
+              } else {
+                entries.push(...results);
+                readEntries();
+              }
+            },
+            (error) => {
+              reject(error);
             }
-          });
+          );
         };
         readEntries();
       });
@@ -87,42 +96,25 @@ export function UploadZone() {
       if (files.length === 0) return;
 
       setUploadingCount(files.length);
-      let successCount = 0;
-      let errorCount = 0;
-
-      // Upload all files
-      const uploadPromises = files.map((file) =>
-        uploadFile.mutateAsync(file).then(
-          () => {
-            successCount++;
-            if (successCount + errorCount === files.length) {
-              setUploadingCount(0);
-              if (files.length > 1) {
-                toast.success(
-                  `Uploaded ${successCount} of ${files.length} files${errorCount > 0 ? ` (${errorCount} failed)` : ""}`
-                );
-              } else {
-                toast.success(`Uploaded "${file.name}"`);
-              }
-            }
-          },
-          () => {
-            errorCount++;
-            if (successCount + errorCount === files.length) {
-              setUploadingCount(0);
-              if (files.length > 1) {
-                toast.error(
-                  `Failed to upload ${errorCount} of ${files.length} files${successCount > 0 ? ` (${successCount} succeeded)` : ""}`
-                );
-              } else {
-                toast.error(`Failed to upload "${file.name}"`);
-              }
-            }
-          }
-        )
+      const results = await Promise.allSettled(
+        files.map((file) => uploadFile.mutateAsync(file))
       );
-
-      await Promise.allSettled(uploadPromises);
+      const successCount = results.filter((r) => r.status === "fulfilled").length;
+      const errorCount = results.filter((r) => r.status === "rejected").length;
+      setUploadingCount(0);
+      if (files.length > 1) {
+        if (errorCount === 0) {
+          toast.success(`Uploaded ${successCount} of ${files.length} files`);
+        } else if (successCount === 0) {
+          toast.error(`Failed to upload ${errorCount} of ${files.length} files`);
+        } else {
+          toast.warning(`Uploaded ${successCount} of ${files.length} files (${errorCount} failed)`);
+        }
+      } else if (successCount > 0) {
+        toast.success(`Uploaded "${files[0].name}"`);
+      } else {
+        toast.error(`Failed to upload "${files[0].name}"`);
+      }
     },
     [uploadFile]
   );
@@ -143,18 +135,12 @@ export function UploadZone() {
       if (!fileList || fileList.length === 0) return;
 
       const files = Array.from(fileList);
-      
-      // Check if files have webkitRelativePath (folder selection)
-      const hasFolderStructure = files.some((file) => (file as any).webkitRelativePath);
-      
       setUploadingCount(files.length);
-      let successCount = 0;
-      let errorCount = 0;
 
       // Upload all files, preserving folder structure in displayName
       const uploadPromises = files.map((file) => {
         // Use webkitRelativePath if available, otherwise use file.name
-        const displayName = (file as any).webkitRelativePath || file.name;
+        const displayName = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
         
         // Create a new File with the displayName preserved
         const fileToUpload = new File([file], displayName, {
@@ -162,37 +148,29 @@ export function UploadZone() {
           lastModified: file.lastModified,
         });
 
-        return uploadFile.mutateAsync(fileToUpload).then(
-          () => {
-            successCount++;
-            if (successCount + errorCount === files.length) {
-              setUploadingCount(0);
-              if (files.length > 1) {
-                toast.success(
-                  `Uploaded ${successCount} of ${files.length} files${errorCount > 0 ? ` (${errorCount} failed)` : ""}`
-                );
-              } else {
-                toast.success(`Uploaded "${displayName}"`);
-              }
-            }
-          },
-          () => {
-            errorCount++;
-            if (successCount + errorCount === files.length) {
-              setUploadingCount(0);
-              if (files.length > 1) {
-                toast.error(
-                  `Failed to upload ${errorCount} of ${files.length} files${successCount > 0 ? ` (${successCount} succeeded)` : ""}`
-                );
-              } else {
-                toast.error(`Failed to upload "${displayName}"`);
-              }
-            }
-          }
-        );
+        return uploadFile.mutateAsync(fileToUpload);
       });
 
-      await Promise.allSettled(uploadPromises);
+      const results = await Promise.allSettled(uploadPromises);
+      const successCount = results.filter((r) => r.status === "fulfilled").length;
+      const errorCount = results.filter((r) => r.status === "rejected").length;
+      setUploadingCount(0);
+      if (files.length > 1) {
+        if (errorCount === 0) {
+          toast.success(`Uploaded ${successCount} of ${files.length} files`);
+        } else if (successCount === 0) {
+          toast.error(`Failed to upload ${errorCount} of ${files.length} files`);
+        } else {
+          toast.warning(`Uploaded ${successCount} of ${files.length} files (${errorCount} failed)`);
+        }
+      } else {
+        const displayName = (files[0] as File & { webkitRelativePath?: string }).webkitRelativePath || files[0].name;
+        if (successCount > 0) {
+          toast.success(`Uploaded "${displayName}"`);
+        } else {
+          toast.error(`Failed to upload "${displayName}"`);
+        }
+      }
       
       // Reset input
       e.target.value = "";
@@ -230,10 +208,21 @@ export function UploadZone() {
       <input
         type="file"
         multiple
-        webkitdirectory=""
         onChange={handleFileSelect}
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
       />
+      <label className="absolute bottom-4 right-4 z-20">
+        <span className="px-3 py-1 rounded-full bg-[var(--accent-primary)]/10 text-xs font-medium text-[var(--accent-primary)] border border-[var(--accent-primary)]/40 shadow-sm hover:bg-[var(--accent-primary)]/20 transition-colors cursor-pointer">
+          Upload folder
+        </span>
+        <input
+          type="file"
+          multiple
+          {...({ webkitdirectory: true } as React.InputHTMLAttributes<HTMLInputElement>)}
+          onChange={handleFileSelect}
+          className="sr-only"
+        />
+      </label>
 
       <div className="relative flex flex-col items-center gap-5">
         {uploadFile.isPending || uploadingCount > 0 ? (

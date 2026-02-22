@@ -82,7 +82,7 @@ export function StoreCard({ store, onOpenChat }: StoreCardProps) {
                   );
                 } else {
                   toast.warning(
-                    `Imported ${successCount} of ${item.files.length} file${item.files.length !== 1 ? "s" : ""} to "${store.displayName}"${failCount > 0 ? ` (${failCount} failed)` : ""}`
+                    `Imported ${successCount} of ${item.files.length} file${item.files.length !== 1 ? "s" : ""} to "${store.displayName}" (${failCount} failed)`
                   );
                 }
                 setIsExpanded(true);
