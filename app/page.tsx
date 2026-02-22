@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatStoreId, setChatStoreId] = useState<string | undefined>(undefined);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+  const [bulkImportStoreId, setBulkImportStoreId] = useState("");
 
   const handleOpenChat = (storeId?: string) => {
     setChatStoreId(storeId);
@@ -38,6 +39,7 @@ export default function Dashboard() {
     isLoading: isLoadingFiles,
     error: filesError,
   } = useFiles();
+  const selectedFilesList = files?.filter((f) => selectedFiles.has(f.name)) ?? [];
 
   const importFiles = useImportFiles();
 
@@ -334,8 +336,9 @@ export default function Dashboard() {
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <select
                           id="bulk-import-store-select"
+                          value={bulkImportStoreId}
+                          onChange={(e) => setBulkImportStoreId(e.target.value)}
                           className="flex-1 min-w-0 px-3 py-1.5 text-sm rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/50"
-                          defaultValue=""
                         >
                           <option value="" disabled>
                             Select a library to import to...
@@ -352,10 +355,8 @@ export default function Dashboard() {
                         <Button
                           size="sm"
                           onClick={() => {
-                            const select = document.getElementById("bulk-import-store-select") as HTMLSelectElement;
-                            const storeId = select?.value;
-                            if (storeId) {
-                              handleBulkImport(storeId);
+                            if (bulkImportStoreId) {
+                              handleBulkImport(bulkImportStoreId);
                             } else {
                               toast.error("Please select a library first");
                             }
@@ -381,23 +382,20 @@ export default function Dashboard() {
                 {/* Scrollable file list */}
                 <div className="max-h-[calc(100vh-440px)] overflow-y-auto scrollbar-thin p-3">
                   <div className="space-y-2">
-                    {files.map((file, index) => {
-                      const selectedFilesList = files.filter((f) => selectedFiles.has(f.name));
-                      return (
-                        <div
-                          key={file.name}
-                          style={{ animationDelay: `${index * 50}ms` }}
-                          className="animate-fade-in opacity-0"
-                        >
-                          <FileCard
-                            file={file}
-                            isSelected={selectedFiles.has(file.name)}
-                            onSelect={handleFileSelect}
-                            selectedFiles={selectedFilesList}
-                          />
-                        </div>
-                      );
-                    })}
+                    {files.map((file, index) => (
+                      <div
+                        key={file.name}
+                        style={{ animationDelay: `${index * 50}ms` }}
+                        className="animate-fade-in opacity-0"
+                      >
+                        <FileCard
+                          file={file}
+                          isSelected={selectedFiles.has(file.name)}
+                          onSelect={handleFileSelect}
+                          selectedFiles={selectedFilesList}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
                 

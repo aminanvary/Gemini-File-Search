@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ai } from "@/lib/gemini";
+import { MIME_TYPE_MAP } from "@/lib/mime-types";
 
 export async function GET(
   request: Request,
@@ -44,13 +45,15 @@ async function importSingleFile(
   storeName: string,
   fileName: string
 ): Promise<{ success: boolean; error?: string; operation?: any }> {
+  let fileNameForImport = fileName;
+
   // Check file state before import
   let fileInfo = null;
   try {
-    fileInfo = await ai.files.get({ name: fileName });
+    fileInfo = await ai.files.get({ name: fileNameForImport });
   } catch (fileError) {
     // File might not exist
-    return { success: false, error: `File not found: ${fileName}` };
+    return { success: false, error: `File not found: ${fileNameForImport}` };
   }
 
   // Verify store exists first
@@ -63,63 +66,53 @@ async function importSingleFile(
   // Check if file has unsupported MIME type - try to fix it automatically
   if (fileInfo?.mimeType === "application/octet-stream" || !fileInfo?.mimeType) {
     // Try to infer correct MIME type from file name and download/re-upload the file
-    const displayName = fileInfo?.displayName || fileName;
+    const displayName = fileInfo?.displayName || fileNameForImport;
     const extension = displayName.split('.').pop()?.toLowerCase();
-    const mimeTypeMap: Record<string, string> = {
-      'md': 'text/markdown',
-      'txt': 'text/plain',
-      'pdf': 'application/pdf',
-      'doc': 'application/msword',
-      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'xls': 'application/vnd.ms-excel',
-      'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'ppt': 'application/vnd.ms-powerpoint',
-      'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'csv': 'text/csv',
-      'json': 'application/json',
-      'html': 'text/html',
-      'htm': 'text/html',
-      'rtf': 'application/rtf',
-    };
     
-    if (extension && mimeTypeMap[extension] && fileInfo?.uri) {
+    if (extension && MIME_TYPE_MAP[extension] && fileInfo?.uri) {
       try {
         // Download the file from Gemini
         const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+          return {
+            success: false,
+            error: "GEMINI_API_KEY environment variable is not set. Cannot download file from Gemini.",
+          };
+        }
         const downloadResponse = await fetch(fileInfo.uri, {
           headers: {
-            'x-goog-api-key': apiKey!,
+            "x-goog-api-key": apiKey,
           },
         });
         
         if (downloadResponse.ok) {
           const fileBuffer = await downloadResponse.arrayBuffer();
-          const blob = new Blob([fileBuffer], { type: mimeTypeMap[extension] });
+          const blob = new Blob([fileBuffer], { type: MIME_TYPE_MAP[extension] });
           
           // Re-upload with correct MIME type
           const newFile = await ai.files.upload({
             file: blob,
             config: {
               displayName: displayName,
-              mimeType: mimeTypeMap[extension],
+              mimeType: MIME_TYPE_MAP[extension],
             },
           });
           
           // Save old file name before updating
-          const oldFileName = fileName;
+          const oldFileName = fileNameForImport;
           
           // Use the new file for import
-          fileName = newFile.name || fileName;
+          fileNameForImport = newFile.name || fileNameForImport;
           
           // Re-fetch file info to ensure we have the latest state
           try {
-            fileInfo = await ai.files.get({ name: fileName });
+            fileInfo = await ai.files.get({ name: fileNameForImport });
           } catch (refetchError) {
             // Use newFile data if refetch fails
             fileInfo = {
               ...fileInfo,
               name: newFile.name,
-              mimeType: mimeTypeMap[extension],
+              mimeType: MIME_TYPE_MAP[extension],
               uri: newFile.uri,
               state: newFile.state,
             };
@@ -151,7 +144,7 @@ async function importSingleFile(
   // Import the file into the store using the SDK
   let operation = await ai.fileSearchStores.importFile({
     fileSearchStoreName: storeName,
-    fileName: fileName,
+    fileName: fileNameForImport,
   });
   
   // Poll until done (max 60 seconds)
@@ -225,13 +218,6 @@ export async function POST(
       });
     } else if (fileName) {
       // Single file import (backward compatible)
-      if (!fileName) {
-        return NextResponse.json(
-          { error: "fileName is required" },
-          { status: 400 }
-        );
-      }
-
       const result = await importSingleFile(storeName, fileName);
       
       if (!result.success) {

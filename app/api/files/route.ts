@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ai } from "@/lib/gemini";
+import { MIME_TYPE_MAP } from "@/lib/mime-types";
 
 function handleError(error: unknown, defaultMessage: string) {
   console.error(defaultMessage, error);
@@ -73,24 +74,8 @@ export async function POST(request: Request) {
       // Extract extension from the actual filename (last part after /)
       const actualFileName = displayName.split('/').pop() || displayName;
       const extension = actualFileName.split('.').pop()?.toLowerCase();
-      const mimeTypeMap: Record<string, string> = {
-        'md': 'text/markdown',
-        'txt': 'text/plain',
-        'pdf': 'application/pdf',
-        'doc': 'application/msword',
-        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'xls': 'application/vnd.ms-excel',
-        'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'ppt': 'application/vnd.ms-powerpoint',
-        'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        'csv': 'text/csv',
-        'json': 'application/json',
-        'html': 'text/html',
-        'htm': 'text/html',
-        'rtf': 'application/rtf',
-      };
-      if (extension && mimeTypeMap[extension]) {
-        mimeType = mimeTypeMap[extension];
+      if (extension && MIME_TYPE_MAP[extension]) {
+        mimeType = MIME_TYPE_MAP[extension];
       }
     }
     
