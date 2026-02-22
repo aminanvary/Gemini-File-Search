@@ -10,6 +10,9 @@ import { Button } from "@/app/components/ui/button";
 
 interface FileCardProps {
   file: GeminiFile;
+  isSelected?: boolean;
+  onSelect?: (file: GeminiFile, selected: boolean) => void;
+  selectedFiles?: GeminiFile[]; // All selected files for bulk drag
 }
 
 function formatBytes(bytes: string | undefined): string {
@@ -55,19 +58,29 @@ function getMimeTypeColor(mimeType: string | undefined): {
   return { bg: "bg-[var(--bg-surface)]", text: "text-[var(--text-muted)]" };
 }
 
-export function FileCard({ file }: FileCardProps) {
+export function FileCard({ file, isSelected = false, onSelect, selectedFiles }: FileCardProps) {
   const deleteFile = useDeleteFile();
 
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: DragTypes.FILE,
-      item: { type: DragTypes.FILE, file },
+      item: {
+        type: DragTypes.FILE,
+        file,
+        // If this file is part of a selection and there are multiple selected, include all selected files
+        files: selectedFiles && selectedFiles.length > 1 && isSelected ? selectedFiles : undefined,
+      },
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
     }),
-    [file]
+    [file, isSelected, selectedFiles]
   );
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    onSelect?.(file, e.target.checked);
+  };
 
   const handleDelete = () => {
     const fileId = getFileId(file.name);
@@ -93,7 +106,8 @@ export function FileCard({ file }: FileCardProps) {
         "border border-[var(--border)]/40",
         "hover:from-[var(--bg-surface)] hover:to-[var(--bg-surface)]/60",
         "hover:border-[var(--border)]/70 hover:shadow-lg hover:shadow-black/20",
-        isDragging && "opacity-50 cursor-grabbing scale-[0.98] border-[var(--accent-primary)]/50"
+        isDragging && "opacity-50 cursor-grabbing scale-[0.98] border-[var(--accent-primary)]/50",
+        isSelected && "border-[var(--accent-primary)]/60 bg-gradient-to-r from-[var(--accent-primary)]/10 to-[var(--bg-surface)]/40"
       )}
     >
       {/* Left accent bar based on file type */}
@@ -104,6 +118,16 @@ export function FileCard({ file }: FileCardProps) {
       )} />
 
       <div className="flex items-center gap-4 p-3 pl-5">
+        {/* Checkbox for selection */}
+        {onSelect && (
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={handleCheckboxChange}
+            onClick={(e) => e.stopPropagation()}
+            className="w-4 h-4 rounded border-[var(--border)] text-[var(--accent-primary)] focus:ring-[var(--accent-primary)] focus:ring-2 cursor-pointer"
+          />
+        )}
         {/* File icon with type indicator */}
         <div className="relative flex-shrink-0">
           <div

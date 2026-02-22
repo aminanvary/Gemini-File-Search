@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useStores, useFiles } from "@/lib/hooks";
+import { useState, useCallback } from "react";
+import { useStores, useFiles, useImportFiles } from "@/lib/hooks";
 import { StoreCard, StoreCardSkeleton } from "./components/StoreCard";
 import { FileCard, FileCardSkeleton } from "./components/FileCard";
 import { UploadZone } from "./components/UploadZone";
@@ -13,11 +13,15 @@ import { ChatPanel } from "./components/ChatPanel";
 import { FolderIcon, FileIcon, ChatIconFancy } from "./components/Icons";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
+import { toast } from "sonner";
+import type { GeminiFile } from "@/lib/types";
 
 export default function Dashboard() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatStoreId, setChatStoreId] = useState<string | undefined>(undefined);
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+  const [bulkImportStoreId, setBulkImportStoreId] = useState("");
 
   const handleOpenChat = (storeId?: string) => {
     setChatStoreId(storeId);
@@ -35,6 +39,62 @@ export default function Dashboard() {
     isLoading: isLoadingFiles,
     error: filesError,
   } = useFiles();
+  const selectedFilesList = files?.filter((f) => selectedFiles.has(f.name)) ?? [];
+
+  const importFiles = useImportFiles();
+
+  const handleFileSelect = useCallback((file: GeminiFile, selected: boolean) => {
+    setSelectedFiles((prev) => {
+      const next = new Set(prev);
+      if (selected) {
+        next.add(file.name);
+      } else {
+        next.delete(file.name);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(
+    (checked: boolean) => {
+      if (checked && files) {
+        setSelectedFiles(new Set(files.map((f) => f.name)));
+      } else {
+        setSelectedFiles(new Set());
+      }
+    },
+    [files]
+  );
+
+  const handleBulkImport = useCallback(
+    (storeId: string) => {
+      if (selectedFiles.size === 0) return;
+
+      const fileNames = Array.from(selectedFiles);
+      importFiles.mutate(
+        { storeId, fileNames },
+        {
+          onSuccess: (result) => {
+            const successCount = result.results?.filter((r) => r.success).length || 0;
+            const failCount = result.results?.filter((r) => !r.success).length || 0;
+            
+            if (failCount === 0) {
+              toast.success(`Imported ${successCount} file${successCount !== 1 ? "s" : ""} successfully`);
+            } else {
+              toast.warning(
+                `Imported ${successCount} file${successCount !== 1 ? "s" : ""}, ${failCount} failed`
+              );
+            }
+            setSelectedFiles(new Set());
+          },
+          onError: () => {
+            toast.error("Failed to import files");
+          },
+        }
+      );
+    },
+    [selectedFiles, importFiles]
+  );
 
   return (
     <div className="min-h-screen">
@@ -249,14 +309,74 @@ export default function Dashboard() {
                 {/* File count summary */}
                 <div className="px-5 py-4 border-b border-[var(--border)]/30 bg-[var(--bg-surface)]/30">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
-                      {files.length} {files.length === 1 ? 'file' : 'files'} available
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={files.length > 0 && selectedFiles.size === files.length}
+                        onChange={(e) => handleSelectAll(e.target.checked)}
+                        className="w-4 h-4 rounded border-[var(--border)] text-[var(--accent-primary)] focus:ring-[var(--accent-primary)] focus:ring-2 cursor-pointer"
+                        title="Select all files"
+                      />
+                      <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+                        {files.length} {files.length === 1 ? 'file' : 'files'} available
+                        {selectedFiles.size > 0 && (
+                          <span className="ml-2 text-[var(--accent-primary)]">
+                            • {selectedFiles.size} selected
+                          </span>
+                        )}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                       <span className="text-xs text-emerald-400">Ready to use</span>
                     </div>
                   </div>
+                  {selectedFiles.size > 0 && (
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <select
+                          id="bulk-import-store-select"
+                          value={bulkImportStoreId}
+                          onChange={(e) => setBulkImportStoreId(e.target.value)}
+                          className="flex-1 min-w-0 px-3 py-1.5 text-sm rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/50"
+                        >
+                          <option value="" disabled>
+                            Select a library to import to...
+                          </option>
+                          {stores?.map((store) => {
+                            const storeId = store.name.replace("fileSearchStores/", "");
+                            return (
+                              <option key={store.name} value={storeId}>
+                                {store.displayName || storeId}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            if (bulkImportStoreId) {
+                              handleBulkImport(bulkImportStoreId);
+                            } else {
+                              toast.error("Please select a library first");
+                            }
+                          }}
+                          disabled={importFiles.isPending || !stores || stores.length === 0}
+                          className="bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-white whitespace-nowrap"
+                        >
+                          {importFiles.isPending ? "Importing..." : `Import ${selectedFiles.size} Selected`}
+                        </Button>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setSelectedFiles(new Set())}
+                        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] whitespace-nowrap"
+                      >
+                        Clear Selection
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Scrollable file list */}
@@ -268,7 +388,12 @@ export default function Dashboard() {
                         style={{ animationDelay: `${index * 50}ms` }}
                         className="animate-fade-in opacity-0"
                       >
-                        <FileCard file={file} />
+                        <FileCard
+                          file={file}
+                          isSelected={selectedFiles.has(file.name)}
+                          onSelect={handleFileSelect}
+                          selectedFiles={selectedFilesList}
+                        />
                       </div>
                     ))}
                   </div>
