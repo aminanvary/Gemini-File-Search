@@ -36,6 +36,7 @@ export const DragTypes = {
 export interface DragItem {
   type: typeof DragTypes.FILE;
   file: GeminiFile;
+  files?: GeminiFile[]; // For bulk drag operations
 }
 
 // Chat types

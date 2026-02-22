@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ai } from "@/lib/gemini";
+import { MIME_TYPE_MAP } from "@/lib/mime-types";
 
 function handleError(error: unknown, defaultMessage: string) {
   console.error(defaultMessage, error);
@@ -63,14 +64,29 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     
+    // Use file.name which may contain folder structure (e.g., "folder/subfolder/file.txt")
+    // The frontend preserves the folder structure in the file name
+    const displayName = file.name;
+    
+    // Detect MIME type from file extension if browser didn't provide one or provided generic type
+    let mimeType = file.type;
+    if (!mimeType || mimeType === "application/octet-stream") {
+      // Extract extension from the actual filename (last part after /)
+      const actualFileName = displayName.split('/').pop() || displayName;
+      const extension = actualFileName.split('.').pop()?.toLowerCase();
+      if (extension && MIME_TYPE_MAP[extension]) {
+        mimeType = MIME_TYPE_MAP[extension];
+      }
+    }
+    
     // Create a Blob from the buffer for the SDK
-    const blob = new Blob([buffer], { type: file.type });
+    const blob = new Blob([buffer], { type: mimeType });
     
     const uploadedFile = await ai.files.upload({
       file: blob,
       config: {
-        displayName: file.name,
-        mimeType: file.type,
+        displayName: displayName,
+        mimeType: mimeType,
       },
     });
     

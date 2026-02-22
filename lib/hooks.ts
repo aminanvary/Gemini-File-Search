@@ -102,6 +102,36 @@ export function useImportFile() {
   });
 }
 
+export function useImportFiles() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      storeId,
+      fileNames,
+    }: {
+      storeId: string;
+      fileNames: string[];
+    }) => {
+      const res = await fetch(`/api/stores/${storeId}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileNames }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to import files");
+      }
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["documents", variables.storeId],
+      });
+    },
+  });
+}
+
 export function useDeleteDocument() {
   const queryClient = useQueryClient();
 
